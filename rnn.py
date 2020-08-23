@@ -1,5 +1,7 @@
 # Recurrent Neural Network
 
+
+
 # Part 1 - Data Preprocessing
 
 # Importing the libraries
@@ -93,14 +95,18 @@ regressor.add(LSTM(units = 50))
 regressor.add(Dropout(0.2))
 
 # Adding the output layer
+# units = 1 -> is the dimension of output layer (This is what we predict)
 regressor.add(Dense(units = 1))
 
 # Compiling the RNN
+# optimizer = 'adam' -> Good choice, Another optimizer for RNN - RMSProp
+# loss = 'mean_squared_error' because we are doing some regression.
 regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
 regressor.fit(X_train, y_train, epochs = 100, batch_size = 32)
 
+# After training with epochs = 100, we see our loss decresing.
 
 
 # Part 3 - Making the predictions and visualising the results
@@ -110,16 +116,29 @@ dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')
 real_stock_price = dataset_test.iloc[:, 1:2].values
 
 # Getting the predicted stock price of 2017
+# new dataset with concatenated datasets with only 'Open' column.
+# axis = 0, will give us all the rows, so along vertical axis.
 dataset_total = pd.concat((dataset_train['Open'], dataset_test['Open']), axis = 0)
+
+# Get the previous 60 financial days observed stock prices.  
+# Add '.values' to make into numpy array
 inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
+
+# change the shape opf numpy array
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
+
+# We make the 3D data structure expected
 X_test = []
 for i in range(60, 80):
     X_test.append(inputs[i-60:i, 0])
 X_test = np.array(X_test)
+
+# Make it a 3D structure:
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 predicted_stock_price = regressor.predict(X_test)
+
+# Inverse scaling of our predictions because our regressor was trained to predict the scaled values of stock prices
 predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 
 # Visualising the results
