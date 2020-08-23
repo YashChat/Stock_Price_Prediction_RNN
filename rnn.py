@@ -1,7 +1,5 @@
 # Recurrent Neural Network
 
-
-
 # Part 1 - Data Preprocessing
 
 # Importing the libraries
